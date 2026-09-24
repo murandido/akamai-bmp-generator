@@ -10,7 +10,8 @@ internal encryption and field order. An SDK-generated sensor collected from an
 Android device has the same seven-part outer shape and `4.2.0` suffix, but its
 encrypted payload is much larger (10,540 versus about 4,120 base64 characters)
 and it has a 326-character sixth segment where this generator currently emits
-an empty segment. The native builder's output and encryption have not been
+an empty segment. The SDK Java layer identifies this segment as its BMP
+server-side signal. The native builder's output and encryption have not been
 reproduced. An Azul availability request with this generator's output received
 HTTP 403, so this package must not be represented as accepted SDK 4.0.5 support.
 
