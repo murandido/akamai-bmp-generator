@@ -58,13 +58,17 @@ func TestAzulSensorLayoutAndIntegrity(t *testing.T) {
 	if !strings.HasPrefix(s, "4.2.0") || !strings.Contains(s, "br.com.voeazul") {
 		t.Fatal("sensor version or app identity missing")
 	}
+	if !strings.Contains(s, "-90,buildId=") ||
+		!strings.Contains(s, "#screenWidth=") ||
+		!strings.Contains(s, "#cpuABI=") {
+		t.Fatal("SDK JavaScript signal field names missing")
+	}
 	last := 0
 	for _, field := range []string{
 		"-90,", "-91,", "-70,", "-80,", "-121,", "-100,", "-101,",
-		"-102,", "-103,", "-104,", "-108,", "-112,", "-117,", "-120,",
+		"-102,", "-103,", "-104,", "-108,", "-112,", "-115,", "-117,", "-120,",
 		"-144,", "-160,", "-142,", "-145,", "-161,", "-143,", "-150,",
 		"-163,", "-165,", "-166,", "-171,", "-240,", "-172,", "-180,",
-		"-115,",
 	} {
 		at := strings.Index(s[last:], Separator+field)
 		if at < 0 {

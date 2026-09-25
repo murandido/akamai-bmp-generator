@@ -117,6 +117,7 @@ type DeviceProfile struct {
 	BaseOS            string      `json:"base_os"`
 	ABI32             string      `json:"abi_32"`
 	ABI64             string      `json:"abi_64"`
+	CPUABI            string      `json:"cpu_abi"`
 	ScreenHeight      int         `json:"screen_height"`
 	ScreenWidth       int         `json:"screen_width"`
 	ScreenCount       int         `json:"screen_count"`
@@ -599,8 +600,8 @@ func GenerateOrientation(numEvents int) (string, string, int64) {
 	if n < 2 {
 		n = 2
 	}
-	if n > 128 {
-		n = 128
+	if n > 512 {
+		n = 512
 	}
 	az := walk(n, mrand.Float64()*360-180, 2.0)
 	pi := walk(n, mrand.Float64()*60-30, 1.5)
@@ -620,8 +621,8 @@ func GenerateMotion(numEvents int) (string, string, int64) {
 	if n < 2 {
 		n = 2
 	}
-	if n > 128 {
-		n = 128
+	if n > 512 {
+		n = 512
 	}
 	axes := [][]float64{
 		noise(n, 0.1, 0.3), noise(n, 0.2, 0.4), noise(n, 9.6, 0.3),
@@ -762,6 +763,16 @@ func buildCounters(oCk, mCk int64, touchCount int, initTS, nowMS int64) string {
 
 func itoa(i int) string { return strconv.Itoa(i) }
 
+func generateAppiumSignal() string {
+	// The SDK emits four linked integers when its root/Appium checks are clear.
+	i := mrand.Intn(1000) + 1
+	a := 7 * i
+	b := (8 * i) ^ a
+	c := (9 * i) ^ b
+	d := (5 * i) ^ c
+	return fmt.Sprintf("%d,%d,%d,%d", a, b, c, d)
+}
+
 func BuildSensorPairs(d DeviceProfile, pkg, appVer string, appCode int, serverURL, jsSignals, cprSignal string, touchTaps, sensorEvents int) [][]string {
 	nowMS := time.Now().UnixMilli()
 	initTS := nowMS - int64(mrand.Intn(4001)+2000)
@@ -774,8 +785,8 @@ func BuildSensorPairs(d DeviceProfile, pkg, appVer string, appCode int, serverUR
 	counters := buildCounters(oCk, mCk, touchCount, initTS, nowMS)
 
 	if jsSignals == "" {
-		jsSignals = fmt.Sprintf("host=%s#appIdentifier=%s#model=%s#serverSideSignal=#pureJsSignal=8,%s-%s,%d,%d,%s,,0,-1,-1,%d,%d,%d#mapping_flag=1#jvx=cf-sdk-2-08.js",
-			d.Host, pkg, d.Model, d.LocaleLanguage, d.LocaleCountry,
+		jsSignals = fmt.Sprintf("buildId=%s#screenWidth=%d#cpuABI=%s#serverSideSignal=#pureJsSignal=8,%s-%s,%d,%d,%s,,0,-1,-1,%d,%d,%d#mapping_flag=1#jvx=cf-sdk-2-08.js",
+			d.BuildID, d.ScreenWidth, d.CPUABI, d.LocaleLanguage, d.LocaleCountry,
 			d.ScreenHeight/2-8, d.ScreenWidth/2-8, d.WebviewFPHash,
 			mrand.Intn(8001)+1000, mrand.Intn(4501)+500, mrand.Intn(7001)+2000)
 	}
@@ -795,6 +806,7 @@ func BuildSensorPairs(d DeviceProfile, pkg, appVer string, appCode int, serverUR
 		{"-104", fmt.Sprintf("%d,%d,-50,-301,%d", d.TimezoneOffset/60, mrand.Intn(4), mrand.Intn(20)+1)},
 		{"-108", ""},
 		{"-112", perf},
+		{"-115", counters},
 		{"-117", touchStr},
 		{"-120", ""},
 		{"-144", oSum},
@@ -809,9 +821,8 @@ func BuildSensorPairs(d DeviceProfile, pkg, appVer string, appCode int, serverUR
 		{"-166", buildAndroidInfo(d)},
 		{"-171", serverURL},
 		{"-240", "0"},
-		{"-172", ""}, // additional sensor data (SDK 4.0.5)
+		{"-172", generateAppiumSignal()},
 		{"-180", ""}, // enabled accessibility services
-		{"-115", counters},
 	}
 }
 
@@ -982,6 +993,7 @@ func DeviceProfileFromDM(device dm.Device, lang string) DeviceProfile {
 		BaseOS:            "",
 		ABI32:             "-1",
 		ABI64:             "-1",
+		CPUABI:            "arm64-v8a",
 		ScreenHeight:      device.Screen.HeightPixels,
 		ScreenWidth:       device.Screen.WidthPixels,
 		ScreenCount:       1,
