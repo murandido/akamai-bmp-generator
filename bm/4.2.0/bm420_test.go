@@ -6,6 +6,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -75,5 +76,60 @@ func TestAzulSensorLayoutAndIntegrity(t *testing.T) {
 			t.Fatalf("missing or out-of-order field %s", field)
 		}
 		last += at + len(Separator+field)
+	}
+}
+
+func TestAndroidSDKFieldShapes(t *testing.T) {
+	devices, err := dm.LoadDevicesFromFile("../../server/db/devices.json")
+	if err != nil || len(devices) == 0 {
+		t.Fatalf("load devices: %v", err)
+	}
+	profile := DeviceProfileFromDM(devices[0], "pt_BR")
+	pairs := BuildSensorPairs(profile, "br.com.voeazul", "7.6.0", 4154,
+		"https://b2c-api.voeazul.com.br/", "synthetic JS", "0", 3, 256)
+	fields := make(map[string]string, len(pairs))
+	for _, pair := range pairs {
+		fields[pair[0]] = pair[1]
+	}
+	for field, count := range map[string]int{"-112": 9, "-115": 19, "-163": 8} {
+		if got := len(strings.Split(fields[field], ",")); got != count {
+			t.Errorf("%s: got %d comma fields, Android SDK has %d", field, got, count)
+		}
+	}
+	fingerprint := strings.Split(fields["-100"], ",")
+	if len(fingerprint) != 40 || fingerprint[9] != profile.Release ||
+		fingerprint[12] != profile.Bootloader ||
+		fingerprint[23] != profile.Incremental ||
+		fingerprint[29] != profile.BuildUser ||
+		fingerprint[30] != profile.BuildDisplay ||
+		fingerprint[34] != profile.Fingerprint {
+		t.Fatal("-100 does not match Android SDK property positions")
+	}
+	androidInfo := strings.Split(fields["-166"], ",")
+	if len(androidInfo) != 39 || androidInfo[20] != URLEncode(profile.BuildID) ||
+		androidInfo[21] != URLEncode(profile.RadioVersion) ||
+		androidInfo[23] != URLEncode(profile.ABI32) ||
+		androidInfo[24] != URLEncode(profile.ABI64) ||
+		androidInfo[29] != "false" || androidInfo[30] != "false" ||
+		androidInfo[35] != "false" {
+		t.Fatal("-166 does not match Android SDK property positions")
+	}
+	perf := strings.Split(fields["-112"], ",")
+	sqrtHits, err := strconv.Atoi(perf[4])
+	if err != nil {
+		t.Fatal(err)
+	}
+	sqrtHundreds, err := strconv.Atoi(perf[5])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sqrtHits < 0 || sqrtHundreds < 1 || sqrtHits > sqrtHundreds*100 {
+		t.Fatalf("impossible sqrt benchmark relationship: %d/%d", sqrtHits, sqrtHundreds)
+	}
+	if !strings.HasSuffix(fields["-163"], ",false,false") {
+		t.Fatal("native device-info status fields missing")
+	}
+	if !strings.HasSuffix(fields["-171"], "/") {
+		t.Fatal("SDK endpoint lost trailing slash")
 	}
 }

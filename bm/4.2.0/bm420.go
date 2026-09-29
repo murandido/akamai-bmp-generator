@@ -94,57 +94,66 @@ var mustEncode = map[byte]bool{34: true, 37: true, 39: true, 44: true, 92: true}
 // ── Types ────────────────────────────────────────────────────────────────────
 
 type DeviceProfile struct {
-	Model             string      `json:"model"`
-	Manufacturer      string      `json:"manufacturer"`
-	Brand             string      `json:"brand"`
-	Device            string      `json:"device"`
-	Product           string      `json:"product"`
-	Board             string      `json:"board"`
-	Hardware          string      `json:"hardware"`
-	Bootloader        string      `json:"bootloader"`
-	Fingerprint       string      `json:"fingerprint"`
-	BuildID           string      `json:"build_id"`
-	BuildDisplay      string      `json:"build_display"`
-	BuildTags         string      `json:"build_tags"`
-	BuildType         string      `json:"build_type"`
-	BuildUser         string      `json:"build_user"`
-	Incremental       string      `json:"incremental"`
-	Codename          string      `json:"codename"`
-	Release           string      `json:"release"`
-	SDKInt            int         `json:"sdk_int"`
-	SecurityPatch     string      `json:"security_patch"`
-	PreviewSDKInt     int         `json:"preview_sdk_int"`
-	BaseOS            string      `json:"base_os"`
-	ABI32             string      `json:"abi_32"`
-	ABI64             string      `json:"abi_64"`
-	CPUABI            string      `json:"cpu_abi"`
-	ScreenHeight      int         `json:"screen_height"`
-	ScreenWidth       int         `json:"screen_width"`
-	ScreenCount       int         `json:"screen_count"`
-	DensityDPI        string      `json:"density_dpi"`
-	RefreshRate       float64     `json:"refresh_rate"`
-	Host              string      `json:"host"`
-	Serial            string      `json:"serial"`
-	RadioVersion      string      `json:"radio_version"`
-	BuildTime         int64       `json:"build_time"`
-	UserAgent         string      `json:"user_agent"`
-	UAHash            string      `json:"ua_hash"`
-	LocaleLanguage    string      `json:"locale_language"`
-	LocaleCountry     string      `json:"locale_country"`
-	TimezoneOffset    int         `json:"timezone_offset_min"`
-	BluetoothName     string      `json:"bluetooth_name"`
-	TelephonyStatus   int         `json:"telephony_status"`
-	SIMStatus         int         `json:"sim_status"`
-	NFCEnabled        int         `json:"nfc_enabled"`
-	AirplaneMode      int         `json:"airplane_mode"`
-	IsTablet          int         `json:"is_tablet"`
-	MemoryTotalKB     int         `json:"memory_total_kb"`
-	StorageTotalBytes int64       `json:"storage_total_bytes"`
-	AppSignatureSHA1  string      `json:"app_signature_sha1"`
-	WebviewFPHash     string      `json:"webview_fp_hash"`
-	SensorRates       SensorRates `json:"sensor_rates"`
-	AndroidID         string      `json:"android_id,omitempty"`
-	DeviceID          string      `json:"device_id,omitempty"`
+	Model               string      `json:"model"`
+	Manufacturer        string      `json:"manufacturer"`
+	Brand               string      `json:"brand"`
+	Device              string      `json:"device"`
+	Product             string      `json:"product"`
+	Board               string      `json:"board"`
+	Hardware            string      `json:"hardware"`
+	Bootloader          string      `json:"bootloader"`
+	Fingerprint         string      `json:"fingerprint"`
+	BuildID             string      `json:"build_id"`
+	BuildDisplay        string      `json:"build_display"`
+	BuildTags           string      `json:"build_tags"`
+	BuildType           string      `json:"build_type"`
+	BuildUser           string      `json:"build_user"`
+	Incremental         string      `json:"incremental"`
+	Codename            string      `json:"codename"`
+	Release             string      `json:"release"`
+	SDKInt              int         `json:"sdk_int"`
+	SecurityPatch       string      `json:"security_patch"`
+	PreviewSDKInt       int         `json:"preview_sdk_int"`
+	BaseOS              string      `json:"base_os"`
+	ABI32               string      `json:"abi_32"`
+	ABI64               string      `json:"abi_64"`
+	CPUABI              string      `json:"cpu_abi"`
+	ScreenHeight        int         `json:"screen_height"`
+	ScreenWidth         int         `json:"screen_width"`
+	ScreenCount         int         `json:"screen_count"`
+	IsCharging          bool        `json:"is_charging"`
+	BatteryPercent      int         `json:"battery_percent"`
+	Orientation         int         `json:"orientation"`
+	AutoRotate          int         `json:"auto_rotate"`
+	PhysicalKeyboard    bool        `json:"physical_keyboard"`
+	GlobalSettingFlag   int         `json:"global_setting_flag"`
+	DensityDPI          string      `json:"density_dpi"`
+	RefreshRate         float64     `json:"refresh_rate"`
+	Host                string      `json:"host"`
+	Serial              string      `json:"serial"`
+	RadioVersion        string      `json:"radio_version"`
+	BuildTime           int64       `json:"build_time"`
+	UserAgent           string      `json:"user_agent"`
+	UAHash              string      `json:"ua_hash"`
+	InstalledApps       []string    `json:"installed_apps,omitempty"`
+	LocaleLanguage      string      `json:"locale_language"`
+	LocaleCountry       string      `json:"locale_country"`
+	TimezoneOffset      int         `json:"timezone_offset_min"`
+	BluetoothName       string      `json:"bluetooth_name"`
+	TelephonyStatus     int         `json:"telephony_status"`
+	SIMStatus           int         `json:"sim_status"`
+	NFCEnabled          int         `json:"nfc_enabled"`
+	AirplaneMode        int         `json:"airplane_mode"`
+	IsTablet            int         `json:"is_tablet"`
+	MemoryTotalKB       int         `json:"memory_total_kb"`
+	StorageTotalBytes   int64       `json:"storage_total_bytes"`
+	AppSignatureSHA1    string      `json:"app_signature_sha1"`
+	InstallTimestampMS  int64       `json:"install_timestamp_ms,omitempty"`
+	AppStartTimestampMS int64       `json:"app_start_timestamp_ms,omitempty"`
+	WebviewFPHash       string      `json:"webview_fp_hash"`
+	SensorRates         SensorRates `json:"sensor_rates"`
+	AndroidID           string      `json:"android_id,omitempty"`
+	DeviceID            string      `json:"device_id,omitempty"`
 }
 
 type SensorRates struct {
@@ -679,11 +688,66 @@ func GenerateLifecycle(n int, baseTS int64) string {
 }
 
 func GeneratePerformance() string {
-	v := []int{
-		mrand.Intn(16) + 5, mrand.Intn(26) + 15, mrand.Intn(41) + 40,
-		mrand.Intn(26) + 10, mrand.Intn(501) + 100, mrand.Intn(16) + 5,
-		mrand.Intn(401) + 400, mrand.Intn(8) + 3, mrand.Intn(1701) + 800,
+	// Match the five short benchmarks in the Android SDK's V.b(). The
+	// resulting counts are correlated; nine independent random numbers are
+	// visibly unlike a native -112 field.
+	limit := 3 * time.Millisecond
+	start := time.Now()
+	intHits, intIterations := 0, 0
+	for i := 1; i < 1_000_000; i++ {
+		if ((4508713 % i) * 11 % i) == 0 {
+			intHits++
+		}
+		if i%100 == 0 && time.Since(start) > limit {
+			break
+		}
+		intIterations++
 	}
+	start = time.Now()
+	floatHits, floatIterations := 0, 0
+	f := float32(33.34)
+	for i := 1; i < 1_000_000; i++ {
+		f += float32(i)
+		if (float32(19.239)*f)/float32(3.56) < 10000 {
+			floatHits++
+		}
+		if i%100 == 0 && time.Since(start) > limit {
+			break
+		}
+		floatIterations++
+	}
+	start = time.Now()
+	sqrtHits, sqrtIterations := 0, 0
+	for i := 1; i < 1_000_000; i++ {
+		if math.Sqrt(float64(i)) > 30 {
+			sqrtHits++
+		}
+		if i%100 == 0 && time.Since(start) > limit {
+			break
+		}
+		sqrtIterations++
+	}
+	start = time.Now()
+	trigHits, trigIterations := 0, 0
+	for i := 1; i < 1_000_000; i++ {
+		// The SDK divides two ints before passing the result to Math.*.
+		x := float64(i / 1_000_000)
+		if math.Acos(x)+math.Asin(x)+math.Atan(x) > 1.5 {
+			trigHits++
+		}
+		if i%100 == 0 && time.Since(start) > limit {
+			break
+		}
+		trigIterations++
+	}
+	start = time.Now()
+	spinIterations := 0
+	for i := 1; i < 1_000_000 && time.Since(start) <= limit; i++ {
+		spinIterations++
+	}
+	v := []int{intHits, intIterations / 100, floatHits,
+		floatIterations / 100, sqrtHits, sqrtIterations / 100,
+		trigHits, trigIterations / 100, spinIterations}
 	s := make([]string, len(v))
 	for i, x := range v {
 		s[i] = strconv.Itoa(x)
@@ -694,17 +758,25 @@ func GeneratePerformance() string {
 // ── Serializer ───────────────────────────────────────────────────────────────
 
 func buildDeviceFP(d DeviceProfile, pkg string) string {
+	charging := 0
+	if d.IsCharging {
+		charging = 1
+	}
+	keyboard := 0
+	if d.PhysicalKeyboard {
+		keyboard = 1
+	}
 	fields := []string{
-		itoa(d.TelephonyStatus), "uaend", itoa(d.SIMStatus),
-		itoa(d.ScreenHeight), itoa(d.ScreenWidth), itoa(d.ScreenCount),
-		itoa(mrand.Intn(21) + 80), "1", d.LocaleLanguage,
-		itoa(d.SDKInt), itoa(d.IsTablet), d.Model,
-		d.Incremental, d.Hardware, "-1", pkg,
+		"-1", "uaend", "-1",
+		itoa(d.ScreenHeight), itoa(d.ScreenWidth), itoa(charging),
+		itoa(d.BatteryPercent), itoa(d.Orientation), d.LocaleLanguage,
+		d.Release, itoa(d.AutoRotate), d.Model,
+		d.Bootloader, d.Hardware, "-1", pkg,
 		"-1", "-1", d.AndroidID, "-1",
-		itoa(d.AirplaneMode), itoa(d.NFCEnabled),
-		d.Codename, d.BuildDisplay, itoa(d.SDKInt),
+		itoa(keyboard), itoa(d.GlobalSettingFlag),
+		d.Codename, d.Incremental, itoa(d.SDKInt),
 		d.Manufacturer, d.Product, d.BuildTags,
-		d.BuildType, d.DensityDPI, d.Fingerprint,
+		d.BuildType, d.BuildUser, d.BuildDisplay,
 		d.Board, d.Brand, d.Device,
 		d.Fingerprint, d.Host, d.BuildID,
 	}
@@ -726,39 +798,46 @@ func buildCommonInfo(d DeviceProfile) string {
 	}, ",")
 }
 
-func buildAndroidInfo(d DeviceProfile) string {
+func buildAndroidInfo(d DeviceProfile, pkg string) string {
 	neg := URLEncode("-1")
+	apps := d.InstalledApps
+	if len(apps) == 0 {
+		apps = []string{pkg}
+	}
+	installedAppsHash := sha256Hex(strings.Join(apps, "#"))
 	fields := make([]string, 0, 39)
 	for i := 0; i < 20; i++ {
 		fields = append(fields, neg)
 	}
 	fields = append(fields,
 		URLEncode(d.BuildID),
-		URLEncode(d.Incremental+","+d.Incremental),
-		neg,
+		URLEncode(d.RadioVersion),
+		URLEncode(d.Serial),
 		URLEncode(d.ABI32),
 		URLEncode(d.ABI64),
 		URLEncode(fmt.Sprintf("%d", d.BuildTime)),
 		URLEncode(itoa(d.PreviewSDKInt)),
 		URLEncode(d.SecurityPatch),
-		URLEncode(fmt.Sprintf("%.1f", d.RefreshRate)),
-		URLEncode("true"), URLEncode("true"),
-		URLEncode(fmt.Sprintf("%.1f", d.RefreshRate)),
+		URLEncode("1.0"),
+		URLEncode("false"), URLEncode("false"),
+		URLEncode("1.0"),
 		URLEncode("0"), URLEncode("0"),
-		neg, neg, URLEncode("0"),
-		URLEncode(d.UAHash),
+		neg, URLEncode("false"), URLEncode("0"),
+		URLEncode(installedAppsHash),
 		URLEncode(d.UserAgent),
 	)
 	return strings.Join(fields, ",")
 }
 
-func buildCounters(oCk, mCk int64, touchCount int, initTS, nowMS int64) string {
+func buildCounters(oCk, mCk int64, touchCount, sensorEvents int, initTS, nowMS int64, buildStarted time.Time) string {
 	elapsed := nowMS - initTS
-	fck := GQRJZH(0, touchCount, elapsed)
-	return fmt.Sprintf("0,%d,%d,%d,%d,%d,0,%d,128,128,%d,%d,1,%d,%d,1,0",
-		(oCk+mCk)%65536, oCk, mCk, oCk+mCk,
-		mrand.Intn(30001)+10000, mrand.Intn(23)+10,
-		65000, 40000, fck, initTS)
+	checksum := GQRJZH(int(oCk+mCk), touchCount+sensorEvents*2, elapsed)
+	buildMicros := time.Since(buildStarted).Microseconds()
+	// Order mirrors CYFManager.t(): four component checksums, sum, age,
+	// event counts, sensor sample counts, init/build times, flags and hash.
+	return fmt.Sprintf("0,0,%d,%d,%d,%d,0,%d,%d,%d,36000,%d,-1,%d,%d,1,19,0,0",
+		oCk, mCk, oCk+mCk, elapsed, touchCount,
+		sensorEvents, sensorEvents, buildMicros, checksum, initTS)
 }
 
 func itoa(i int) string { return strconv.Itoa(i) }
@@ -774,15 +853,19 @@ func generateAppiumSignal() string {
 }
 
 func BuildSensorPairs(d DeviceProfile, pkg, appVer string, appCode int, serverURL, jsSignals, cprSignal string, touchTaps, sensorEvents int) [][]string {
+	buildStarted := time.Now()
 	nowMS := time.Now().UnixMilli()
 	initTS := nowMS - int64(mrand.Intn(4001)+2000)
+	if d.AppStartTimestampMS > 0 && initTS < d.AppStartTimestampMS {
+		initTS = d.AppStartTimestampMS
+	}
 
 	oData, oSum, oCk := GenerateOrientation(sensorEvents)
 	mData, mSum, mCk := GenerateMotion(sensorEvents)
 	touchStr, touchCount := GenerateTouchEvents(touchTaps, d.ScreenWidth, d.ScreenHeight)
 	lifecycle := GenerateLifecycle(3, nowMS-int64(mrand.Intn(3001)+3000))
 	perf := GeneratePerformance()
-	counters := buildCounters(oCk, mCk, touchCount, initTS, nowMS)
+	counters := buildCounters(oCk, mCk, touchCount, sensorEvents, initTS, nowMS, buildStarted)
 
 	if jsSignals == "" {
 		jsSignals = fmt.Sprintf("buildId=%s#screenWidth=%d#cpuABI=%s#serverSideSignal=#pureJsSignal=8,%s-%s,%d,%d,%s,,0,-1,-1,%d,%d,%d#mapping_flag=1#jvx=cf-sdk-2-08.js",
@@ -792,7 +875,15 @@ func BuildSensorPairs(d DeviceProfile, pkg, appVer string, appCode int, serverUR
 	}
 
 	fp := buildDeviceFP(d, pkg)
-	appIdentity := fmt.Sprintf(",%s,%s %d,0,%d,%d", d.AppSignatureSHA1, appVer, appCode, initTS, nowMS)
+	installTS := d.InstallTimestampMS
+	if installTS <= 0 {
+		installTS = nowMS - int64(30*24*time.Hour/time.Millisecond)
+	}
+	appStartTS := d.AppStartTimestampMS
+	if appStartTS <= 0 {
+		appStartTS = initTS
+	}
+	appIdentity := fmt.Sprintf(",%s,%s %d,0,%d,%d,false,false", d.AppSignatureSHA1, appVer, appCode, installTS, appStartTS)
 
 	return [][]string{
 		{"", SDKVersion},
@@ -818,7 +909,7 @@ func BuildSensorPairs(d DeviceProfile, pkg, appVer string, appCode int, serverUR
 		{"-150", "1,0"},
 		{"-163", appIdentity},
 		{"-165", buildCommonInfo(d)},
-		{"-166", buildAndroidInfo(d)},
+		{"-166", buildAndroidInfo(d, pkg)},
 		{"-171", serverURL},
 		{"-240", "0"},
 		{"-172", generateAppiumSignal()},
@@ -957,13 +1048,12 @@ func DeviceProfileFromDM(device dm.Device, lang string) DeviceProfile {
 	if androidID == "" {
 		androidID = randomHex(8)
 	}
+	// K.E() reads WebSettings.getDefaultUserAgent(), not the app's API UA.
+	// Chrome/WebView version is a profile approximation until calibrated for
+	// a particular device, but the native grammar matters for -166.
 	userAgent := fmt.Sprintf(
-		"Akamai BAPSDK/%s (Android; %s; %s; %s; %s)",
-		SDKVersion,
-		device.Build.Version.Release,
-		device.Build.Manufacturer,
-		device.Build.Model,
-		language,
+		"Mozilla/5.0 (Linux; Android %s; %s Build/%s; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/125.0.6422.113 Mobile Safari/537.36",
+		device.Build.Version.Release, device.Build.Model, device.Build.ID,
 	)
 
 	buildTime := time.Now().AddDate(-2, 0, 0).UnixMilli()
@@ -991,17 +1081,20 @@ func DeviceProfileFromDM(device dm.Device, lang string) DeviceProfile {
 		SecurityPatch:     securityPatch,
 		PreviewSDKInt:     0,
 		BaseOS:            "",
-		ABI32:             "-1",
-		ABI64:             "-1",
+		ABI32:             "armeabi-v7a#armeabi",
+		ABI64:             "arm64-v8a",
 		CPUABI:            "arm64-v8a",
 		ScreenHeight:      device.Screen.HeightPixels,
 		ScreenWidth:       device.Screen.WidthPixels,
 		ScreenCount:       1,
+		BatteryPercent:    50,
+		Orientation:       1,
+		AutoRotate:        1,
 		DensityDPI:        "dpi",
 		RefreshRate:       60.0,
 		Host:              device.Build.Host,
-		Serial:            "unknown",
-		RadioVersion:      "",
+		Serial:            "-1",
+		RadioVersion:      "-1",
 		BuildTime:         buildTime,
 		UserAgent:         userAgent,
 		UAHash:            sha256Hex(userAgent),
