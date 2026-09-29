@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"xvertile/akamai-bmp/dm"
 )
@@ -19,6 +20,12 @@ func TestAzulSensorLayoutAndIntegrity(t *testing.T) {
 		t.Fatalf("load devices: %v", err)
 	}
 	profile := DeviceProfileFromDM(devices[0], "pt_BR")
+	repeatedProfile := DeviceProfileFromDM(devices[0], "pt_BR")
+	if profile.BuildTime != repeatedProfile.BuildTime ||
+		profile.SecurityPatch != repeatedProfile.SecurityPatch ||
+		time.UnixMilli(profile.BuildTime).Year() != 2019 {
+		t.Fatal("build properties must remain stable and match the release era")
+	}
 	profile.AppSignatureSHA1 = "bb40c0885cba78e617b4c484de534fc0b5dd3c59"
 	g, err := NewGenerator(profile, "br.com.voeazul", "7.4.1", 4141,
 		"https://b2c-api.voeazul.com.br")

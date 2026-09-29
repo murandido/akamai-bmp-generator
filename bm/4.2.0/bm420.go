@@ -1056,8 +1056,23 @@ func DeviceProfileFromDM(device dm.Device, lang string) DeviceProfile {
 		device.Build.Version.Release, device.Build.Model, device.Build.ID,
 	)
 
-	buildTime := time.Now().AddDate(-2, 0, 0).UnixMilli()
-	securityPatch := time.Now().AddDate(0, -3, 0).Format("2006-01-02")
+	// The APK reads fixed Build.TIME and SECURITY_PATCH values. Derive a
+	// stable, release-era approximation when the device database omits them;
+	// basing either on time.Now makes one persistent device change on every
+	// sensor generation.
+	majorRelease, _ := strconv.Atoi(strings.Split(device.Build.Version.Release, ".")[0])
+	buildYear := 2010 + majorRelease
+	if majorRelease < 7 || majorRelease > 16 {
+		buildYear = 2023
+	}
+	buildMonth := time.December
+	if majorRelease >= 16 {
+		buildMonth = time.August
+	}
+	buildSeed := sha256.Sum256([]byte(device.Build.Display + device.Build.Version.Incremental))
+	buildDay := 5 + int(buildSeed[0])%20
+	buildTime := time.Date(buildYear, buildMonth, buildDay, 12, 0, 0, 0, time.UTC).UnixMilli()
+	securityPatch := time.Date(buildYear, buildMonth, 1, 0, 0, 0, 0, time.UTC).Format("2006-01-02")
 
 	return DeviceProfile{
 		Model:             device.Build.Model,
