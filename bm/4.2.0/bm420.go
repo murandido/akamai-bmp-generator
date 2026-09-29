@@ -140,6 +140,7 @@ type DeviceProfile struct {
 	LocaleCountry       string      `json:"locale_country"`
 	TimezoneOffset      int         `json:"timezone_offset_min"`
 	BluetoothName       string      `json:"bluetooth_name"`
+	LocalIP             string      `json:"local_ip,omitempty"`
 	TelephonyStatus     int         `json:"telephony_status"`
 	SIMStatus           int         `json:"sim_status"`
 	NFCEnabled          int         `json:"nfc_enabled"`
@@ -790,11 +791,16 @@ func buildDeviceFP(d DeviceProfile, pkg string) string {
 func buildCommonInfo(d DeviceProfile) string {
 	osVer := fmt.Sprintf("Android %s %s API %d", d.Codename, d.Release, d.SDKInt)
 	locale := d.LocaleLanguage + d.LocaleCountry
+	localIP := d.LocalIP
+	if localIP == "" {
+		ipSeed := sha256.Sum256([]byte(d.AndroidID))
+		localIP = fmt.Sprintf("192.168.1.%d", 2+int(ipSeed[0])%253)
+	}
 	return strings.Join([]string{
 		URLEncode(osVer), URLEncode(locale),
 		URLEncode(itoa(d.TimezoneOffset)),
 		URLEncode(d.BluetoothName),
-		URLEncode(fmt.Sprintf("192.168.%d.%d", mrand.Intn(255)+1, mrand.Intn(254)+1)),
+		URLEncode(localIP),
 	}, ",")
 }
 

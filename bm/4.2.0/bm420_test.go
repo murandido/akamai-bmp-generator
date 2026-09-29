@@ -26,6 +26,9 @@ func TestAzulSensorLayoutAndIntegrity(t *testing.T) {
 		time.UnixMilli(profile.BuildTime).Year() != 2019 {
 		t.Fatal("build properties must remain stable and match the release era")
 	}
+	if buildCommonInfo(profile) != buildCommonInfo(profile) {
+		t.Fatal("local device info must stay stable across sensor requests")
+	}
 	profile.AppSignatureSHA1 = "bb40c0885cba78e617b4c484de534fc0b5dd3c59"
 	g, err := NewGenerator(profile, "br.com.voeazul", "7.4.1", 4141,
 		"https://b2c-api.voeazul.com.br")
