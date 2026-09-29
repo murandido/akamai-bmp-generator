@@ -29,6 +29,10 @@ func TestAzulSensorLayoutAndIntegrity(t *testing.T) {
 	if buildCommonInfo(profile) != buildCommonInfo(profile) {
 		t.Fatal("local device info must stay stable across sensor requests")
 	}
+	if profile.MemoryTotalKB != repeatedProfile.MemoryTotalKB ||
+		profile.StorageTotalBytes != repeatedProfile.StorageTotalBytes {
+		t.Fatal("memory and storage capacities must stay stable for a device")
+	}
 	profile.AppSignatureSHA1 = "bb40c0885cba78e617b4c484de534fc0b5dd3c59"
 	g, err := NewGenerator(profile, "br.com.voeazul", "7.4.1", 4141,
 		"https://b2c-api.voeazul.com.br")

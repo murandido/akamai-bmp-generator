@@ -1076,6 +1076,7 @@ func DeviceProfileFromDM(device dm.Device, lang string) DeviceProfile {
 		buildMonth = time.August
 	}
 	buildSeed := sha256.Sum256([]byte(device.Build.Display + device.Build.Version.Incremental))
+	deviceSeed := sha256.Sum256([]byte(device.Build.Fingerprint + "|" + device.Build.Model))
 	buildDay := 5 + int(buildSeed[0])%20
 	buildTime := time.Date(buildYear, buildMonth, buildDay, 12, 0, 0, 0, time.UTC).UnixMilli()
 	securityPatch := time.Date(buildYear, buildMonth, 1, 0, 0, 0, 0, time.UTC).Format("2006-01-02")
@@ -1128,8 +1129,8 @@ func DeviceProfileFromDM(device dm.Device, lang string) DeviceProfile {
 		NFCEnabled:        1,
 		AirplaneMode:      0,
 		IsTablet:          0,
-		MemoryTotalKB:     8192000 + mrand.Intn(2097152),
-		StorageTotalBytes: 128000000000 + int64(mrand.Intn(64000000000)),
+		MemoryTotalKB:     8192000 + int(deviceSeed[0])*8192,
+		StorageTotalBytes: 128000000000 + int64(deviceSeed[1])*250000000,
 		AppSignatureSHA1:  DefaultSignatureSHA1,
 		WebviewFPHash:     sha256Hex(userAgent + "|webview"),
 		SensorRates: SensorRates{
