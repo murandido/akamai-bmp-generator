@@ -147,3 +147,35 @@ func TestAndroidSDKFieldShapes(t *testing.T) {
 		t.Fatal("SDK endpoint lost trailing slash")
 	}
 }
+
+func TestNativeStaticFieldsStayStableAcrossSensorCalls(t *testing.T) {
+	devices, err := dm.LoadDevicesFromFile("../../server/db/devices.json")
+	if err != nil || len(devices) == 0 {
+		t.Fatalf("load devices: %v", err)
+	}
+	profile := DeviceProfileFromDM(devices[0], "pt_BR")
+	profile.AndroidID = "0123456789abcdef"
+	profile.DeviceID = profile.AndroidID
+	profile.AppStartTimestampMS = 1790000000000
+	profile.InstallTimestampMS = 1780000000000
+	makeFields := func() map[string]string {
+		pairs := BuildSensorPairs(profile, "br.com.voeazul", "7.6.0", 4154,
+			"https://b2c-api.voeazul.com.br/", "same JS signal", "0", 3, 32)
+		fields := make(map[string]string, len(pairs))
+		for _, pair := range pairs {
+			fields[pair[0]] = pair[1]
+		}
+		return fields
+	}
+	first, second := makeFields(), makeFields()
+	for _, field := range []string{"-90", "-163", "-165", "-166", "-171"} {
+		if first[field] != second[field] {
+			t.Errorf("%s changes despite stable device and app process", field)
+		}
+	}
+	fp1, fp2 := strings.Split(first["-100"], ","), strings.Split(second["-100"], ",")
+	if len(fp1) != 40 || len(fp2) != 40 ||
+		strings.Join(fp1[:38], ",") != strings.Join(fp2[:38], ",") {
+		t.Error("static -100 device properties change across sensor calls")
+	}
+}
